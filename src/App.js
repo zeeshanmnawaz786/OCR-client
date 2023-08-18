@@ -18,6 +18,7 @@ const App = () => {
     setIsProcessing(true);
     setOcrText("");
     setPctg("0.00");
+
     await workerRef.current.load();
     await workerRef.current.loadLanguage("eng");
     await workerRef.current.initialize("eng");
@@ -28,6 +29,32 @@ const App = () => {
 
     setIsProcessing(false);
     setOcrText(text);
+  };
+
+  const classifyText = (word) => {
+    // This logic attempts to classify based on common name patterns
+    const normalizedWord = word.toLowerCase();
+
+    // if (normalizedWord === "john" || normalizedWord === "jane") {
+    if (normalizedWord === "kareem") {
+      console.log(
+        "🚀 ~ file: App.js:37 ~ classifyText ~ normalizedWord:",
+        normalizedWord
+      );
+      return "person-name";
+    } else {
+      return "other";
+    }
+  };
+
+  const classifyWords = (text) => {
+    const words = text.split(/\s+/); // Split by any whitespace
+    const classifiedWords = words.map((word, index) => (
+      <span key={index} className={classifyText(word)}>
+        {word + " "}
+      </span>
+    ));
+    return classifiedWords;
   };
 
   const updateProgressAndLog = (m) => {
@@ -57,7 +84,7 @@ const App = () => {
               onaddfile={(err, file) => {
                 doOCR(file);
               }}
-              onremovefile={(err, fiile) => {
+              onremovefile={(err, file) => {
                 setOcrText("");
               }}
             />
@@ -83,15 +110,16 @@ const App = () => {
           </h5>
           <div className="card-body">
             <p className="card-text">
-              {isProcessing
-                ? "..........."
-                : ocrText.length === 0
-                ? "No Valid Text Found / Upload Image to Parse Text From Image"
-                : ocrText}
+              {isProcessing ? (
+                "..........."
+              ) : ocrText.length === 0 ? (
+                "No Valid Text Found / Upload Image to Parse Text From Image"
+              ) : (
+                <span>{classifyWords(ocrText)}</span>
+              )}
             </p>
           </div>
         </div>
-        <div className="ocr-text"></div>
       </div>
     </div>
   );
